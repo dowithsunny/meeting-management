@@ -28,6 +28,9 @@
             <input type="hidden" id="latitude" name="latitude">
             <input type="hidden" id="longitude" name="longitude">
             <input type="hidden" id="ip" name="ip">
+            <input type="hidden" id="city" name="city">
+            <input type="hidden" id="dtime" name="dtime">
+            <input type="hidden" id="dkm" name="dkm">
             <div class="row">
                 <div class="col-sm">
                     <input type="submit" class="btn btn-primary">
@@ -61,8 +64,60 @@
                     let ip = data.ip;
 
                     jQuery("#ip").val(ip);
+
+                    getCity(ip);
                 });
             });
         });
+
+        function getCity(ip) {
+            var req = new XMLHttpRequest();
+            req.open("GET", "http://ip-api.com/json/" + ip, true);
+            req.send();
+
+            req.onreadystatechange = function() {
+                if (req.readyState == 4 && req.status == 200) {
+                    var obj = JSON.parse(req.responseText);
+                    jQuery("#city").val(obj.city);
+                    calculateDistance();
+                }
+            }
+        }
+
+        function calculateDistance() {
+            var to = jQuery("#city").val();
+            var from = jQuery("#location").val();
+
+            var service = new google.maps.DistanceMatrixService();
+
+            service.getDistanceMatrix({
+
+                origins: [to],
+                destinations: [from],
+                travelMode: google.maps.TravelMode.DRIVING,
+                unitSystem: google.maps.UnitSystem.metric,
+                avoidHighways: false,
+                avoidTolls: false,
+
+            }, callback);
+        }
+
+        function callback(response, status) {
+            if (status != google.maps.DistanceMatrixStatus.OK) {
+                console.log("Something wrong");
+            } else {
+                if (response.rows[0].elements[0].status == "ZERO_RESULTS") {
+                    console.log("No roads available");
+                } else {
+                    var distance = response.rows[0].elements[0].distance;
+                    var duration = response.rows[0].elements[0].duration;
+                    var distance_in_km = distance.value/1000; //distance in kilometers
+                    var duration_in_minutes = duration.value/60;
+
+                    jQuery("#dkm").val(parseInt(distance_in_km));
+                    jQuery("#dtime").val(parseInt(duration_in_minutes));
+                }
+            }
+        }
     </script>
 @endsection
