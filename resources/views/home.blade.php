@@ -4,8 +4,12 @@
     <div class="container">
         <a href="{{ url('/logout') }}">Logout</a>
         <h2>Meeting Management</h2>
-        <form action="" method="POST">
+        <form action="{{ route("addMeeting") }}" method="POST">
             @csrf
+            
+            {{-- Get current logged in user id from database --}}
+            <input type="hidden" name="user_id" value="{{ Auth::id() }}">
+            
             <div class="row">
                 <div class="col-sm-3">
                     <label for="">Location</label><br>
@@ -37,6 +41,9 @@
                 </div>
             </div>
         </form>
+        @if (Session::has('success'))
+            <p style="color:green;">{{ Session::get('success') }}</p>
+        @endif
     </div>
     {{-- Google Place Autocomplete API [replace new key with the old ones] --}}
     <script type="text/javascript"
