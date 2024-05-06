@@ -23,7 +23,10 @@ Route::post('/login',[UserController::class,'userLogin'])->name('userLogin');
 Route::get('/register',[UserController::class,'loadRegister']);
 Route::post('/register',[UserController::class,'userRegister'])->name('userRegister');
 
-Route::get('/logout',[UserController::class,'logout']);
+Route::get('/logout',[UserController::class,'logout'])->name('logout');
 
 Route::get('/home',[UserController::class,'home']);
 Route::post('/home',[MeetingController::class,'addMeeting'])->name('addMeeting');
+
+//Get Meetings by Date
+Route::get('/get',[MeetingController::class, 'getDateMeetings'])->name('getDateMeetings');

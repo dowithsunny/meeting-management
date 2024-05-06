@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Meeting;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -63,7 +64,8 @@ class UserController extends Controller
     public function home()
     {
         if (Auth::check()) {
-            return view('home');
+            $meetings = Meeting::where('user_id', Auth::id())->get();
+            return view('home', compact('meetings'));
         } else {
             return redirect('/');
         }        

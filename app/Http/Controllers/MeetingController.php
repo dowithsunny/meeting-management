@@ -38,4 +38,10 @@ class MeetingController extends Controller
             return back()->with("Success", "Meeting schedule with client added successfully!");
         }
     }
+
+    public function getDateMeetings(Request $request)
+    {
+        $meetings = Meeting::where('date', $request->date)->get();
+        return response()->json(['meetings' => $meetings]);
+    }
 }
