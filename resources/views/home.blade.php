@@ -68,6 +68,7 @@
             <tbody class="tbody">
                 @if (count($meeting) > 0)
                     @foreach ($meetings as $meeting)
+                       <tr onclick="showMap({{ $meeting->latitude }},{{ $meeting->longitude }})">
                         <td>{{ $meeting->id }}</td>
                         <td>{{ $meeting->name }}</td>
                         <td>{{ $meeting->location }}</td>
@@ -78,6 +79,7 @@
                         <td>{{ $meeting->distance_km }} KM</td>
                         <td>{{ $meeting->current_km }} KM</td>
                         <td>{{ $meeting->date }}</td>
+                       </tr>
                     @endforeach
                 @else
                     <tr>
@@ -86,6 +88,11 @@
                 @endif
             </tbody>
         </table>
+    </div>
+
+    {{-- Google map start --}}
+    <div class="container mb-5">
+        <div class="" id="map" style="width: 100%; height: 300px;"></div>
     </div>
 
     {{-- Google Place Autocomplete API [replace new key with the old ones] --}}
@@ -133,7 +140,7 @@
                         if (meetings.length > 0) {
                             for (let i = 0; i < meetings.length; i++) {
                                 html +=`
-                                    <tr>
+                                    <tr onclick="showMap(`+meetings[i]['latitude']+`,`+meetings[i]['longitude']+`)">
                                         <td>`+meetings[i]['id']+`</td>    
                                         <td>`+meetings[i]['name']+`</td>    
                                         <td>`+meetings[i]['location']+`</td>    
@@ -209,5 +216,26 @@
                 }
             }
         }
+
+        // Google map code start
+        function showMap(lat, long)
+        {
+            var coord = {lat:lat, lng:long};
+
+           var map = new google.maps.Map(
+                document.getElementByID("map"),
+                {
+                    zoom: 10,
+                    center: coord;
+                }
+            );
+
+            new google.map.Marker({
+                position: coord;
+                map: map;
+            });
+        }
+
+        showMap(0,0);
     </script>
 @endsection
