@@ -63,23 +63,32 @@
                     <th>Distance KM</th>
                     <th>Current KM</th>
                     <th>Date</th>
+                    <th>Status</th>
                 </tr>
             </thead>
             <tbody class="tbody">
                 @if (count($meeting) > 0)
                     @foreach ($meetings as $meeting)
-                       <tr onclick="showMap({{ $meeting->latitude }},{{ $meeting->longitude }})">
-                        <td>{{ $meeting->id }}</td>
-                        <td>{{ $meeting->name }}</td>
-                        <td>{{ $meeting->location }}</td>
-                        <td>{{ $meeting->latitude }}</td>
-                        <td>{{ $meeting->longitude }}</td>
-                        <td>{{ $meeting->meeting_time }}</td>
-                        <td>{{ $meeting->distance_time }}</td>
-                        <td>{{ $meeting->distance_km }} KM</td>
-                        <td>{{ $meeting->current_km }} KM</td>
-                        <td>{{ $meeting->date }}</td>
-                       </tr>
+                        <tr onclick="showMap({{ $meeting->latitude }},{{ $meeting->longitude }})">
+                            <td>{{ $meeting->id }}</td>
+                            <td>{{ $meeting->name }}</td>
+                            <td>{{ $meeting->location }}</td>
+                            <td>{{ $meeting->latitude }}</td>
+                            <td>{{ $meeting->longitude }}</td>
+                            <td>{{ $meeting->meeting_time }}</td>
+                            <td>{{ $meeting->distance_time }}</td>
+                            <td>{{ $meeting->distance_km }} KM</td>
+                            <td>{{ $meeting->current_km }} KM</td>
+                            <td>{{ $meeting->date }}</td>
+                            <td>
+                                <select name="status" id="" class="status_change" data-id="{{ $meeting->id }}">
+                                    <option value="0" @if ($meeting->status == 0) selected @endif>Pending
+                                    </option>
+                                    <option value="1" @if ($meeting->status == 1) selected @endif>Completed
+                                    </option>
+                                </select>
+                            </td>
+                        </tr>
                     @endforeach
                 @else
                     <tr>
@@ -127,32 +136,53 @@
             });
 
             //get meetings by date
-            $("#date").change(function(){
+            $("#date").change(function() {
                 var date = $(this).val();
 
                 $.ajax({
-                    url:"{{ route('getDateMeetings') }}",
-                    type:"GET",
-                    data:{'date':date},
-                    success:function(data){
+                    url: "{{ route('getDateMeetings') }}",
+                    type: "GET",
+                    data: {
+                        'date': date
+                    },
+                    success: function(data) {
                         var html = "";
                         var meetings = data.meetings;
                         if (meetings.length > 0) {
                             for (let i = 0; i < meetings.length; i++) {
-                                html +=`
-                                    <tr onclick="showMap(`+meetings[i]['latitude']+`,`+meetings[i]['longitude']+`)">
-                                        <td>`+meetings[i]['id']+`</td>    
-                                        <td>`+meetings[i]['name']+`</td>    
-                                        <td>`+meetings[i]['location']+`</td>    
-                                        <td>`+meetings[i]['latitude']+`</td>    
-                                        <td>`+meetings[i]['longitude']+`</td>    
-                                        <td>`+meetings[i]['meeting_time']+`</td>    
-                                        <td>`+meetings[i]['distance_time']+`</td>    
-                                        <td>`+meetings[i]['distance_km']+` KM</td>    
-                                        <td>`+meetings[i]['current_km']+` KM</td>    
-                                        <td>`+meetings[i]['date']+`</td>    
+                                html += `
+                                    <tr onclick="showMap(` + meetings[i]['latitude'] + `,` + meetings[i]['longitude'] + `)">
+                                        <td>` + meetings[i]['id'] + `</td>    
+                                        <td>` + meetings[i]['name'] + `</td>    
+                                        <td>` + meetings[i]['location'] + `</td>    
+                                        <td>` + meetings[i]['latitude'] + `</td>    
+                                        <td>` + meetings[i]['longitude'] + `</td>    
+                                        <td>` + meetings[i]['meeting_time'] + `</td>    
+                                        <td>` + meetings[i]['distance_time'] + `</td>    
+                                        <td>` + meetings[i]['distance_km'] + ` KM</td>    
+                                        <td>` + meetings[i]['current_km'] + ` KM</td>    
+                                        <td>` + meetings[i]['date'] + `</td> 
+                                        <td>
+                                            <select name="status" id="" class="status_change" data-id="` + meetings[i]['id'] + `">
+                                               
+                                `;
+                                if (meetings[i]['status'] == 0) {
+                                    html += `
+                                         <option value="0" selected>Pending</option>
+                                                <option value="1">Completed</option>                                
+                                            </select>
+                                        </td>   
                                     </tr>
-                                `;                                
+                                    `;
+                                } else {
+                                    html += `
+                                         <option value="0">Pending</option>
+                                                <option value="1" selected>Completed</option>                                
+                                            </select>
+                                        </td>   
+                                    </tr>
+                                    `;
+                                }
                             }
                         } else {
                             html += `
@@ -164,6 +194,20 @@
                         $(".tbody").html(html);
                     }
                 });
+            });
+
+            $(document).on("change","status_change",function(){
+                var id = $(this).attr(data-id);
+                var status = $(this).val();
+
+                $.ajax({
+                    url:"{{ route('updateStatus') }}",
+                    type: "GET",
+                    data:{'id':id,'status':status},
+                    success: function(data){
+                        console.log(data.msg);
+                    }
+                })
             });
         });
 
@@ -218,13 +262,14 @@
         }
 
         // Google map code start
-        function showMap(lat, long)
-        {
-            var coord = {lat:lat, lng:long};
+        function showMap(lat, long) {
+            var coord = {
+                lat: lat,
+                lng: long
+            };
 
-           var map = new google.maps.Map(
-                document.getElementByID("map"),
-                {
+            var map = new google.maps.Map(
+                document.getElementByID("map"), {
                     zoom: 10,
                     center: coord;
                 }
@@ -236,6 +281,6 @@
             });
         }
 
-        showMap(0,0);
+        showMap(0, 0);
     </script>
 @endsection

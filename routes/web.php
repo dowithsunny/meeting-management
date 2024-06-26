@@ -30,3 +30,4 @@ Route::post('/home',[MeetingController::class,'addMeeting'])->name('addMeeting')
 
 //Get Meetings by Date
 Route::get('/get',[MeetingController::class, 'getDateMeetings'])->name('getDateMeetings');
+Route::get('/update-status',[MeetingController::class, 'updateStatus'])->name('updateStatus');

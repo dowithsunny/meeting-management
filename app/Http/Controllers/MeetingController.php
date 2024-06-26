@@ -64,4 +64,12 @@ class MeetingController extends Controller
 
         return response()->json(['meetings' => $meetings]);
     }
+
+    function updateStatus(Request $request){
+        $meeting = Meeting::find($request->id);
+        $meeting->status = $request->status;
+        $meeting->save();
+
+        return response()->json(['msg'=>'Status Updated Successfully']);
+    }
 }
