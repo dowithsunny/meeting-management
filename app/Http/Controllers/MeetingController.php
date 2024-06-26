@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Meeting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\UserController;
 
 class MeetingController extends Controller
 {
@@ -41,7 +42,26 @@ class MeetingController extends Controller
 
     public function getDateMeetings(Request $request)
     {
-        $meetings = Meeting::where('date', $request->date)->get();
+        $userCont = new UserController;
+        $tableData = Meeting::where('date', $request->date)->get();
+
+        $uInfo = @unserialize(file_get_contents("http://ip-api.com/php"));
+
+            $lat = $uInfo['lat'];
+            $lang = $uInfo['lon'];
+
+            $meetings = [];
+
+            foreach($tableData as $data)
+            {
+                $km = $userCont->calculateDistance($lat, $lang, $data->latitude, $data->longitude);
+                $data['current_km'] = ceil($km['kilometers']);
+                $meetings[] = $data;
+            }
+            $key = array_column($meetings, 'current_km');
+            
+            array_multisort($key, SORT_ASC, $meetings);
+
         return response()->json(['meetings' => $meetings]);
     }
 }

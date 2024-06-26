@@ -61,6 +61,7 @@
                     <th>Meeting Time</th>
                     <th>Distance Time</th>
                     <th>Distance KM</th>
+                    <th>Current KM</th>
                     <th>Date</th>
                 </tr>
             </thead>
@@ -75,6 +76,7 @@
                         <td>{{ $meeting->meeting_time }}</td>
                         <td>{{ $meeting->distance_time }}</td>
                         <td>{{ $meeting->distance_km }} KM</td>
+                        <td>{{ $meeting->current_km }} KM</td>
                         <td>{{ $meeting->date }}</td>
                     @endforeach
                 @else
@@ -140,6 +142,7 @@
                                         <td>`+meetings[i]['meeting_time']+`</td>    
                                         <td>`+meetings[i]['distance_time']+`</td>    
                                         <td>`+meetings[i]['distance_km']+` KM</td>    
+                                        <td>`+meetings[i]['current_km']+` KM</td>    
                                         <td>`+meetings[i]['date']+`</td>    
                                     </tr>
                                 `;                                

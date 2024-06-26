@@ -15,7 +15,7 @@ class UserController extends Controller
     {
         if (Auth::check()) {
             return view('/home');
-        } 
+        }
         return view('register');
     }
 
@@ -40,7 +40,7 @@ class UserController extends Controller
     {
         if (Auth::check()) {
             return view('/home');
-        } 
+        }
         return view('login');
     }
 
@@ -64,11 +64,30 @@ class UserController extends Controller
     public function home()
     {
         if (Auth::check()) {
-            $meetings = Meeting::where('user_id', Auth::id())->get();
+            $tableData = Meeting::where('user_id', Auth::id())->get();
+
+            $uInfo = @unserialize(file_get_contents("http://ip-api.com/php"));
+
+            $lat = $uInfo['lat'];
+            $lang = $uInfo['lon'];
+
+            $meetings = [];
+
+            foreach ($tableData as $data) {
+                $km = $this->calculateDistance($lat, $lang, $data->latitude, $data->longitude);
+                $data['current_km'] = ceil($km['kilometers']);
+                $meetings[] = $data;
+            }
+
+            $key = array_column($meetings, 'current_km');
+            
+            array_multisort($key, SORT_ASC, $meetings);
+
             return view('home', compact('meetings'));
-        } else {
+        } 
+        else {
             return redirect('/');
-        }        
+        }
     }
 
     public function logout(Request $request)
@@ -76,5 +95,19 @@ class UserController extends Controller
         $request->session()->flush();
         Auth::logout();
         return redirect('/');
+    }
+
+    function calculateDistance($lat1, $long1, $lat2, $long2)
+    {
+        $theta = $long1 - $long2;
+        $miles = (sin(deg2rad($lat1))) * sin(deg2rad($lat2)) + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * cos(deg2rad($theta));
+
+        $miles = acos($miles);
+        $miles = rad2deg($miles);
+
+        $result['miles'] = $miles * 60 * 1.1515;
+        $result['kilometers'] = $result['miles'] * 1.609344;
+
+        return $result;
     }
 }
